@@ -1,0 +1,28 @@
+{
+  "name": "elaksalon-uae",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "scripts": {
+    "dev": "turbo run dev --filter=@elak/site",
+    "dev:site": "npm run dev -w @elak/site",
+    "dev:admin": "npm run dev -w @elak/admin",
+    "dev:all": "turbo run dev",
+    "build": "turbo run build",
+    "build:site": "npm run build -w @elak/site",
+    "build:admin": "npm run build -w @elak/admin",
+    "lint": "turbo run lint",
+    "start:site": "npm run start -w @elak/site",
+    "start:admin": "npm run start -w @elak/admin"
+  },
+  "devDependencies": {
+    "turbo": "^2.5.4",
+    "typescript": "^5"
+  },
+  "engines": {
+    "node": ">=20"
+  },
+  "packageManager": "npm@10"
+}

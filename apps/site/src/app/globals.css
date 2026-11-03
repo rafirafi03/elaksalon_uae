@@ -1,0 +1,172 @@
+@import "tailwindcss";
+
+:root {
+  --background: #080808;
+  --foreground: #f5f0e8;
+  --gold: #16b8aa;
+  --gold-soft: #3dcfc2;
+  --gold-deep: #0e8f84;
+  --cream: #e8dfd0;
+  --muted: #8a857c;
+  --surface: #121212;
+  --surface-elevated: #1a1a1a;
+  --border: #2a2a2a;
+}
+
+@theme inline {
+  --color-background: #080808;
+  --color-foreground: #f5f0e8;
+  /* Accent teal (was gold) — hex set directly so utilities always pick it up */
+  --color-gold: #16b8aa;
+  --color-gold-soft: #3dcfc2;
+  --color-gold-deep: #0e8f84;
+  --color-cream: #e8dfd0;
+  --color-muted: #8a857c;
+  --color-surface: #121212;
+  --color-surface-elevated: #1a1a1a;
+  --color-border: #2a2a2a;
+  --font-sans: var(--font-manrope);
+  --font-serif: var(--font-playfair);
+}
+
+html {
+  scroll-behavior: smooth;
+  overflow-x: clip;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-manrope), system-ui, sans-serif;
+  font-feature-settings: "ss01" on, "ss02" on;
+  letter-spacing: -0.01em;
+  overflow-x: clip;
+}
+
+::selection {
+  background: color-mix(in srgb, var(--gold) 40%, transparent);
+  color: white;
+}
+
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(24px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes soft-pulse {
+  0%,
+  100% {
+    transform: scale(1);
+  }
+  50% {
+    transform: scale(1.04);
+  }
+}
+
+@keyframes hero-reveal {
+  from {
+    opacity: 0;
+    filter: blur(8px);
+    transform: translateY(28px);
+  }
+  to {
+    opacity: 1;
+    filter: blur(0);
+    transform: translateY(0);
+  }
+}
+
+@keyframes hero-soft-glow {
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.72;
+  }
+}
+
+.animate-fade-up {
+  animation: fade-up 0.9s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+.animate-fade-in {
+  animation: fade-in 1.1s ease both;
+}
+
+.animate-delay-1 {
+  animation-delay: 0.15s;
+}
+
+.animate-delay-2 {
+  animation-delay: 0.3s;
+}
+
+.animate-delay-3 {
+  animation-delay: 0.45s;
+}
+
+.hero-animate {
+  opacity: 0;
+  animation: hero-reveal 1s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+.hero-animate-delay-1 {
+  animation-delay: 0.12s;
+}
+
+.hero-animate-delay-2 {
+  animation-delay: 0.28s;
+}
+
+.hero-animate-delay-3 {
+  animation-delay: 0.44s;
+}
+
+.hero-animate-delay-4 {
+  animation-delay: 0.6s;
+}
+
+.hero-animate-delay-5 {
+  animation-delay: 0.76s;
+}
+
+.hero-gold-pulse {
+  animation: hero-soft-glow 3.2s ease-in-out 1.2s infinite;
+}
+
+.blob-mask {
+  border-radius: 48% 52% 42% 58% / 42% 38% 62% 58%;
+}
+
+.blob-mask-u {
+  border-radius: 55% 45% 48% 52% / 35% 35% 65% 65%;
+}
+
+.hero-blob {
+  border-radius: 60% 40% 55% 45% / 45% 55% 45% 55%;
+}
+
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}

@@ -1,0 +1,89 @@
+@import "tailwindcss";
+
+:root {
+  --background: #080808;
+  --foreground: #f5f0e8;
+  --gold: #16b8aa;
+  --gold-soft: #3dcfc2;
+  --gold-deep: #0e8f84;
+  --cream: #e8dfd0;
+  --muted: #8a857c;
+  --surface: #121212;
+  --surface-elevated: #1a1a1a;
+  --border: #2a2a2a;
+  --danger: #e07a6e;
+  --sidebar-width: 17rem;
+}
+
+@theme inline {
+  --color-background: #080808;
+  --color-foreground: #f5f0e8;
+  --color-gold: #16b8aa;
+  --color-gold-soft: #3dcfc2;
+  --color-gold-deep: #0e8f84;
+  --color-cream: #e8dfd0;
+  --color-muted: #8a857c;
+  --color-surface: #121212;
+  --color-surface-elevated: #1a1a1a;
+  --color-border: #2a2a2a;
+  --color-danger: #e07a6e;
+  --font-sans: var(--font-manrope);
+  --font-serif: var(--font-playfair);
+}
+
+html,
+body {
+  min-height: 100%;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-manrope), system-ui, sans-serif;
+  font-feature-settings: "ss01" on, "ss02" on;
+  letter-spacing: -0.01em;
+}
+
+::selection {
+  background: color-mix(in srgb, var(--gold) 40%, transparent);
+  color: white;
+}
+
+.admin-input {
+  width: 100%;
+  border-radius: 9999px;
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--cream);
+  padding: 0.75rem 1.1rem;
+  font-size: 0.875rem;
+  outline: none;
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+textarea.admin-input {
+  border-radius: 1.25rem;
+  min-height: 6.5rem;
+  padding-top: 0.85rem;
+  padding-bottom: 0.85rem;
+}
+
+.admin-input:focus {
+  border-color: color-mix(in srgb, var(--gold) 55%, var(--border));
+  background: var(--surface-elevated);
+}
+
+.admin-label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-size: 0.7rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--muted);
+}
+
+.admin-card {
+  border-radius: 1.75rem;
+  border: 1px solid var(--border);
+  background: var(--surface-elevated);
+}

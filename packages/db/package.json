@@ -1,0 +1,21 @@
+{
+  "name": "@elak/db",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./types": "./src/types.ts",
+    "./client": "./src/client.ts"
+  },
+  "scripts": {
+    "build": "echo \"@elak/db: source package\"",
+    "lint": "echo \"@elak/db: no lint yet\""
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.49.8"
+  },
+  "devDependencies": {
+    "typescript": "^5"
+  }
+}
