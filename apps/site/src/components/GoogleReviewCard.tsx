@@ -1,7 +1,12 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState, useSyncExternalStore } from "react";
 import type { Review } from "@/lib/reviews";
+
+const noopSubscribe = () => () => {};
+// Fixed once per page load so the snapshot is stable between renders.
+let loadedAt: number | null = null;
+const pageLoadTime = () => (loadedAt ??= Date.now());
 
 /** Google's avatar palette for initials. */
 const AVATAR_COLORS = ["#1a73e8", "#d93025", "#188038", "#e37400", "#9334e6", "#007b83", "#c5221f", "#1967d2"];
@@ -71,8 +76,7 @@ export default function GoogleReviewCard({ review }: { review: Review }) {
   const [expanded, setExpanded] = useState(false);
   const long = review.comment.length > 180;
   // Relative time needs the visitor's clock, so it is filled in after mount.
-  const [now, setNow] = useState<number | null>(null);
-  useEffect(() => setNow(Date.now()), []);
+  const now = useSyncExternalStore(noopSubscribe, pageLoadTime, () => null);
 
   return (
     <article className="flex h-full w-full flex-col rounded-2xl bg-white p-5 font-[Roboto,Arial,sans-serif] text-[#202124] shadow-[0_1px_3px_rgba(60,64,67,0.3),0_4px_8px_3px_rgba(60,64,67,0.15)]">

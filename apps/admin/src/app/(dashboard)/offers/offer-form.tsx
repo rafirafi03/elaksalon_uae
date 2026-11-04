@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState, useSyncExternalStore } from "react";
 import { useFormAction } from "@/lib/use-form-action";
 import Link from "next/link";
 import type { OfferRow } from "@elak/db";
@@ -30,6 +30,13 @@ function toLocalInput(iso: string) {
   return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}T${pad(d.getHours())}:${pad(d.getMinutes())}`;
 }
 
+const WEEK_MS = 7 * 24 * 60 * 60 * 1000;
+const noopSubscribe = () => () => {};
+const browserTimeZone = () => Intl.DateTimeFormat().resolvedOptions().timeZone;
+// Fixed once per page load so the snapshot is stable between renders.
+let loadedAt: number | null = null;
+const pageLoadTime = () => (loadedAt ??= Date.now());
+
 /** datetime-local value (local time) → ISO (UTC) string, or "" if empty/invalid. */
 function toIso(local: string) {
   const ms = Date.parse(local);
@@ -49,18 +56,16 @@ export default function OfferForm({
   const [discountType, setDiscountType] = useState<OfferRow["discount_type"]>(offer?.discount_type ?? "percent");
   // Store exact instants (ISO, UTC). They are only converted to the admin's local time in the browser,
   // so a server in another timezone (e.g. UTC in production) can never shift the saved start/end.
-  const [startsIso, setStartsIso] = useState(offer?.starts_at ?? "");
-  const [endsIso, setEndsIso] = useState(offer?.ends_at ?? "");
-  const [timeZone, setTimeZone] = useState<string | null>(null);
+  // null = not edited yet → use the default (existing value, or now → +7 days for a new offer).
+  const [startsEdited, setStartsIso] = useState<string | null>(null);
+  const [endsEdited, setEndsIso] = useState<string | null>(null);
 
-  useEffect(() => {
-    setTimeZone(Intl.DateTimeFormat().resolvedOptions().timeZone);
-    // New offer: default to now → 7 days, computed with the browser clock.
-    if (!offer) {
-      setStartsIso((v) => v || new Date().toISOString());
-      setEndsIso((v) => v || new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString());
-    }
-  }, [offer]);
+  // Browser-only values (null during server render), read without effects.
+  const timeZone = useSyncExternalStore(noopSubscribe, browserTimeZone, () => null);
+  const now = useSyncExternalStore(noopSubscribe, pageLoadTime, () => null);
+
+  const startsIso = startsEdited ?? offer?.starts_at ?? (now ? new Date(now).toISOString() : "");
+  const endsIso = endsEdited ?? offer?.ends_at ?? (now ? new Date(now + WEEK_MS).toISOString() : "");
 
   const mounted = timeZone !== null;
   const startsLocal = mounted && startsIso ? toLocalInput(startsIso) : "";

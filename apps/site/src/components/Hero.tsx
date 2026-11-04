@@ -1,5 +1,5 @@
 import Image from "next/image";
-import { ArrowRight, Play } from "lucide-react";
+import { ArrowRight } from "lucide-react";
 import Container from "@/components/Container";
 import { images } from "@/lib/images";
 

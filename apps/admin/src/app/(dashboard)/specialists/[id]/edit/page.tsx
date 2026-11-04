@@ -1,9 +1,10 @@
-import { notFound, unstable_rethrow } from "next/navigation";
+import { notFound } from "next/navigation";
 import { connection } from "next/server";
 import PageHeader from "@/components/admin/PageHeader";
 import ErrorState from "@/components/admin/ErrorState";
 import { getAdminSupabase, isSupabaseConfigured } from "@/lib/supabase";
-import { MSG, logAdminError } from "@/lib/messages";
+import { MSG } from "@/lib/messages";
+import { safeLoad } from "@/lib/safe-load";
 import SpecialistForm from "../../specialist-form";
 import { updateSpecialist } from "../../actions";
 
@@ -15,50 +16,16 @@ export default async function EditSpecialistPage({ params }: Params) {
   await connection();
   const { id } = await params;
 
-  if (!isSupabaseConfigured()) {
-    return (
-      <>
-        <PageHeader eyebrow="Team" title="Edit specialist" />
-        <ErrorState description={MSG.unavailable} retryHref="/specialists" />
-      </>
-    );
-  }
+  const result = isSupabaseConfigured()
+    ? await safeLoad("specialists.edit", async () => {
+        const supabase = await getAdminSupabase();
+        const { data, error } = await supabase.from("specialists").select("*").eq("id", id).maybeSingle();
+        if (error) throw error;
+        return data;
+      })
+    : ({ ok: false } as const);
 
-  try {
-    const supabase = await getAdminSupabase();
-    const { data: specialist, error } = await supabase
-      .from("specialists")
-      .select("*")
-      .eq("id", id)
-      .maybeSingle();
-
-    if (error) {
-      logAdminError("specialists.edit", error);
-      return (
-        <>
-          <PageHeader eyebrow="Team" title="Edit specialist" />
-          <ErrorState description={MSG.loadFailed} retryHref="/specialists" />
-        </>
-      );
-    }
-
-    if (!specialist) notFound();
-
-    const action = updateSpecialist.bind(null, id);
-
-    return (
-      <>
-        <PageHeader
-          eyebrow="Team"
-          title={specialist.name}
-          description="Update profile details or replace the portrait."
-        />
-        <SpecialistForm specialist={specialist} action={action} submitLabel="Save changes" />
-      </>
-    );
-  } catch (error) {
-    unstable_rethrow(error);
-    logAdminError("specialists.edit", error);
+  if (!result.ok) {
     return (
       <>
         <PageHeader eyebrow="Team" title="Edit specialist" />
@@ -66,4 +33,14 @@ export default async function EditSpecialistPage({ params }: Params) {
       </>
     );
   }
+
+  const specialist = result.value;
+  if (!specialist) notFound();
+
+  return (
+    <>
+      <PageHeader eyebrow="Team" title={specialist.name} description="Update profile details or replace the portrait." />
+      <SpecialistForm specialist={specialist} action={updateSpecialist.bind(null, id)} submitLabel="Save changes" />
+    </>
+  );
 }

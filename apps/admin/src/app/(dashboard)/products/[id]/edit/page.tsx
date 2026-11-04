@@ -1,9 +1,10 @@
-import { notFound, unstable_rethrow } from "next/navigation";
+import { notFound } from "next/navigation";
 import { connection } from "next/server";
 import PageHeader from "@/components/admin/PageHeader";
 import ErrorState from "@/components/admin/ErrorState";
 import { getAdminSupabase, isSupabaseConfigured } from "@/lib/supabase";
-import { MSG, logAdminError } from "@/lib/messages";
+import { MSG } from "@/lib/messages";
+import { safeLoad } from "@/lib/safe-load";
 import ProductForm from "../../product-form";
 import { updateProduct } from "../../actions";
 
@@ -15,46 +16,16 @@ export default async function EditProductPage({ params }: Params) {
   await connection();
   const { id } = await params;
 
-  if (!isSupabaseConfigured()) {
-    return (
-      <>
-        <PageHeader eyebrow="Catalog" title="Edit product" />
-        <ErrorState description={MSG.unavailable} retryHref="/products" />
-      </>
-    );
-  }
+  const result = isSupabaseConfigured()
+    ? await safeLoad("products.edit", async () => {
+        const supabase = await getAdminSupabase();
+        const { data, error } = await supabase.from("products").select("*").eq("id", id).maybeSingle();
+        if (error) throw error;
+        return data;
+      })
+    : ({ ok: false } as const);
 
-  try {
-    const supabase = await getAdminSupabase();
-    const { data: product, error } = await supabase.from("products").select("*").eq("id", id).maybeSingle();
-
-    if (error) {
-      logAdminError("products.edit", error);
-      return (
-        <>
-          <PageHeader eyebrow="Catalog" title="Edit product" />
-          <ErrorState description={MSG.loadFailed} retryHref="/products" />
-        </>
-      );
-    }
-
-    if (!product) notFound();
-
-    const action = updateProduct.bind(null, id);
-
-    return (
-      <>
-        <PageHeader
-          eyebrow="Catalog"
-          title={product.name}
-          description="Update details or replace the product image."
-        />
-        <ProductForm product={product} action={action} submitLabel="Save changes" />
-      </>
-    );
-  } catch (error) {
-    unstable_rethrow(error);
-    logAdminError("products.edit", error);
+  if (!result.ok) {
     return (
       <>
         <PageHeader eyebrow="Catalog" title="Edit product" />
@@ -62,4 +33,14 @@ export default async function EditProductPage({ params }: Params) {
       </>
     );
   }
+
+  const product = result.value;
+  if (!product) notFound();
+
+  return (
+    <>
+      <PageHeader eyebrow="Catalog" title={product.name} description="Update details or replace the product image." />
+      <ProductForm product={product} action={updateProduct.bind(null, id)} submitLabel="Save changes" />
+    </>
+  );
 }

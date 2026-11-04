@@ -27,6 +27,8 @@ function status(offer: OfferRow, now: number) {
 
 export default async function AdminOffersPage() {
   await connection();
+  // Request-time server component (after connection()), so reading the clock here is intended.
+  // eslint-disable-next-line react-hooks/purity
   const now = Date.now();
 
   let offers: OfferListRow[] = [];
