@@ -1,8 +1,9 @@
 "use client";
 
 import { useState } from "react";
-import { Menu } from "lucide-react";
+import { LogOut, Menu } from "lucide-react";
 import Sidebar from "./Sidebar";
+import { signOut } from "@/app/login/actions";
 
 export default function DashboardShell({ children }: { children: React.ReactNode }) {
   const [open, setOpen] = useState(false);
@@ -30,9 +31,16 @@ export default function DashboardShell({ children }: { children: React.ReactNode
                 <p className="mt-0.5 text-sm text-cream/80">Content management</p>
               </div>
             </div>
-            <span className="hidden rounded-full border border-border px-3 py-1.5 text-[11px] tracking-wide text-muted uppercase sm:inline-flex">
-              UAE
-            </span>
+            <form action={signOut}>
+              <button
+                type="submit"
+                aria-label="Sign out"
+                title="Sign out"
+                className="flex h-10 w-10 items-center justify-center rounded-full border border-border text-muted transition hover:border-danger/60 hover:bg-danger/10 hover:text-danger"
+              >
+                <LogOut size={17} strokeWidth={1.6} />
+              </button>
+            </form>
           </div>
         </header>
 

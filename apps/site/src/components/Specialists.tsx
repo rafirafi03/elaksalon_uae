@@ -38,7 +38,7 @@ export default async function Specialists() {
           itemClassName="basis-[46%] sm:basis-[calc((100%-2rem)/3)] lg:basis-[calc((100%-4.5rem)/4)]"
         >
           {specialists.map((person) => (
-            <SpecialistCard key={person.slug} person={person} />
+            <SpecialistCard key={person.slug} person={person} showSpecialty={false} />
           ))}
         </ScrollCarousel>
       </Container>

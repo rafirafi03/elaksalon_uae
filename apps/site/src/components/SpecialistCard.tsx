@@ -3,7 +3,14 @@ import Link from "next/link";
 import type { Specialist } from "@/lib/specialists";
 import SpecialistAvatar from "@/components/SpecialistAvatar";
 
-export default function SpecialistCard({ person }: { person: Specialist }) {
+export default function SpecialistCard({
+  person,
+  showSpecialty = true,
+}: {
+  person: Specialist;
+  /** Hide the specialty/description line (e.g. compact home page carousel). */
+  showSpecialty?: boolean;
+}) {
   return (
     <Link
       href={`/specialists/${person.slug}`}
@@ -28,7 +35,9 @@ export default function SpecialistCard({ person }: { person: Specialist }) {
         <div className="absolute inset-x-0 bottom-0 p-3 sm:p-4 lg:p-5">
           <h3 className="font-serif text-base text-cream sm:text-lg lg:text-xl">{person.name}</h3>
           <p className="mt-0.5 text-xs text-gold sm:text-sm">{person.role}</p>
-          <p className="mt-1 text-[11px] text-cream/70 sm:text-xs">{person.specialty}</p>
+          {showSpecialty && person.specialty ? (
+            <p className="mt-1 text-[11px] text-cream/70 sm:text-xs">{person.specialty}</p>
+          ) : null}
         </div>
       </div>
     </Link>

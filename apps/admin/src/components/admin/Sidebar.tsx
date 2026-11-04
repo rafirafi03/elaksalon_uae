@@ -2,9 +2,8 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Boxes, Building2, LayoutGrid, LayoutDashboard, LogOut, Package, Scissors, Star, Tag, UserRound, Users, X } from "lucide-react";
+import { Boxes, Building2, LayoutGrid, LayoutDashboard, Package, Scissors, Star, Tag, UserRound, Users, X } from "lucide-react";
 import { cn } from "@/lib/cn";
-import { signOut } from "@/app/login/actions";
 
 const nav = [
   { href: "/", label: "Dashboard", icon: LayoutDashboard },
@@ -60,7 +59,7 @@ export default function Sidebar({
           </button>
         </div>
 
-        <nav className="flex flex-1 flex-col gap-1 px-3 pb-6">
+        <nav className="flex min-h-0 flex-1 flex-col gap-1 overflow-y-auto overscroll-contain px-3 pb-6 [scrollbar-color:var(--color-border)_transparent] [scrollbar-width:thin]">
           <p className="mb-2 px-3 text-[10px] tracking-[0.25em] text-gold uppercase">Menu</p>
           {nav.map((item) => {
             const active =
@@ -88,21 +87,6 @@ export default function Sidebar({
           })}
         </nav>
 
-        <div className="border-t border-border/60 px-6 py-5">
-          <p className="font-serif text-lg text-cream">Salon CMS</p>
-          <p className="mt-1 text-xs leading-relaxed text-muted">
-            Content for the public ELAK experience.
-          </p>
-          <form action={signOut} className="mt-4">
-            <button
-              type="submit"
-              className="inline-flex items-center gap-2 text-xs tracking-wide text-muted uppercase transition hover:text-danger"
-            >
-              <LogOut size={14} strokeWidth={1.6} />
-              Sign out
-            </button>
-          </form>
-        </div>
       </aside>
     </>
   );
