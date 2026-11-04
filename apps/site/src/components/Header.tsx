@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Image from "next/image";
 import Link from "next/link";
 import { Menu, X } from "lucide-react";
 import Container from "@/components/Container";
@@ -9,9 +10,10 @@ import { cn } from "@/lib/cn";
 const links = [
   { href: "/", label: "Home" },
   { href: "/services", label: "Services" },
+  { href: "/packages", label: "Packages" },
   { href: "/products", label: "Products" },
-  { href: "/about", label: "About" },
   { href: "/specialists", label: "Specialists" },
+  { href: "/about", label: "About" },
   { href: "/contact", label: "Contact" },
 ];
 
@@ -57,11 +59,16 @@ export default function Header() {
       )}
     >
       <Container className="relative z-50 flex items-center justify-between py-4 lg:py-5">
-        <Link
-          href="/"
-          className="font-serif text-2xl tracking-[0.2em] text-gold transition-colors hover:text-gold-soft lg:text-[1.75rem]"
-        >
-          ELAK
+        <Link href="/" aria-label="ELAK Salon & Spa — Home" className="block shrink-0 transition-opacity hover:opacity-85">
+          <Image
+            src="/logo.png"
+            alt="ELAK Salon & Spa"
+            width={1232}
+            height={1277}
+            priority
+            sizes="64px"
+            className="h-12 w-auto lg:h-14"
+          />
         </Link>
 
         <nav className="hidden items-center gap-8 lg:flex">

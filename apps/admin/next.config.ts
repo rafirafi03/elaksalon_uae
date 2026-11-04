@@ -3,6 +3,9 @@ import type { NextConfig } from "next";
 const nextConfig: NextConfig = {
   cacheComponents: true,
   partialPrefetching: true,
+  experimental: {
+    serverActions: { bodySizeLimit: "6mb" },
+  },
   transpilePackages: ["@elak/db", "@elak/ui"],
   images: {
     remotePatterns: [

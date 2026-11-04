@@ -2,13 +2,15 @@ import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import Container from "@/components/Container";
 import SpecialistCard from "@/components/SpecialistCard";
-import { specialists } from "@/lib/specialists";
+import ScrollCarousel from "@/components/ScrollCarousel";
+import { getSpecialists } from "@/lib/specialists";
 
-export default function Specialists() {
-  const preview = specialists.slice(0, 4);
+export default async function Specialists() {
+  const specialists = await getSpecialists();
+  if (specialists.length === 0) return null;
 
   return (
-    <section id="specialists" className="py-14 lg:py-20">
+    <section id="specialists" className="py-8 lg:py-12">
       <Container>
         <div className="mb-8 flex flex-col gap-3 lg:mb-12 lg:flex-row lg:items-end lg:justify-between">
           <div>
@@ -31,11 +33,14 @@ export default function Specialists() {
           </div>
         </div>
 
-        <div className="grid grid-cols-2 gap-3 sm:gap-5 lg:grid-cols-4 lg:gap-6">
-          {preview.map((person) => (
-            <SpecialistCard key={person.name} person={person} />
+        <ScrollCarousel
+          label="Our specialists"
+          itemClassName="basis-[46%] sm:basis-[calc((100%-2rem)/3)] lg:basis-[calc((100%-4.5rem)/4)]"
+        >
+          {specialists.map((person) => (
+            <SpecialistCard key={person.slug} person={person} />
           ))}
-        </div>
+        </ScrollCarousel>
       </Container>
     </section>
   );

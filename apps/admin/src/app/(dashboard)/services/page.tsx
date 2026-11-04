@@ -8,6 +8,8 @@ import ErrorState from "@/components/admin/ErrorState";
 import { getAdminSupabase, isSupabaseConfigured } from "@/lib/supabase";
 import { MSG, logAdminError } from "@/lib/messages";
 import DeleteServiceButton from "./delete-button";
+import SortableTable from "@/components/admin/SortableTable";
+import { bulkDeleteServices, reorderServices } from "./actions";
 
 export const instant = false;
 
@@ -21,10 +23,11 @@ export default async function AdminServicesPage() {
     failed = true;
   } else {
     try {
-      const supabase = getAdminSupabase();
+      const supabase = await getAdminSupabase();
       const { data, error } = await supabase
         .from("services")
         .select("*")
+        .order("sort_order", { ascending: true })
         .order("created_at", { ascending: false });
 
       if (error) {
@@ -68,55 +71,42 @@ export default async function AdminServicesPage() {
       ) : null}
 
       {!failed && services.length > 0 ? (
-        <div className="overflow-hidden rounded-[1.75rem] bg-surface-elevated">
-          <div className="overflow-x-auto">
-            <table className="min-w-full text-left text-sm">
-              <thead>
-                <tr className="border-b border-border/70 text-[10px] tracking-[0.2em] text-muted uppercase">
-                  <th className="px-5 py-4 font-medium">Service</th>
-                  <th className="px-4 py-4 font-medium">Category</th>
-                  <th className="px-4 py-4 font-medium">Duration</th>
-                  <th className="px-4 py-4 font-medium">From</th>
-                  <th className="px-5 py-4 font-medium text-right">Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {services.map((service) => (
-                  <tr key={service.id} className="border-t border-border/50 transition hover:bg-surface">
-                    <td className="px-5 py-4">
-                      <div className="flex items-center gap-3">
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img
-                          src={service.image_url}
-                          alt=""
-                          className="h-12 w-12 rounded-2xl bg-surface object-cover"
-                        />
-                        <div>
-                          <div className="font-serif text-base text-cream">{service.title}</div>
-                          <div className="line-clamp-1 text-xs text-muted">{service.description}</div>
-                        </div>
-                      </div>
-                    </td>
-                    <td className="px-4 py-4 text-muted">{service.category}</td>
-                    <td className="px-4 py-4 text-muted">{service.duration}</td>
-                    <td className="px-4 py-4 text-gold">{service.price_from}</td>
-                    <td className="px-5 py-4">
-                      <div className="flex items-center justify-end gap-4">
-                        <Link
-                          href={`/services/${service.id}/edit`}
-                          className="text-sm text-gold transition hover:text-gold-soft"
-                        >
-                          Edit
-                        </Link>
-                        <DeleteServiceButton id={service.id} title={service.title} />
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
+        <SortableTable
+          itemType="service"
+          itemTypePlural="services"
+          onReorder={reorderServices}
+          onBulkDelete={bulkDeleteServices}
+          columns={[
+            { label: "Service" },
+            { label: "Category" },
+            { label: "Duration" },
+            { label: "Price" },
+            { label: "Actions", className: "pr-5 text-right" },
+          ]}
+          rows={services.map((service) => ({
+            id: service.id,
+            label: service.title,
+            cells: [
+              <div key="s" className="flex items-center gap-3">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={service.image_url} alt="" className="h-12 w-12 rounded-2xl bg-surface object-cover" />
+                <div>
+                  <div className="font-serif text-base text-cream">{service.title}</div>
+                  <div className="line-clamp-1 text-xs text-muted">{service.description}</div>
+                </div>
+              </div>,
+              <span key="c" className="text-muted">{service.category}</span>,
+              <span key="d" className="text-muted">{service.duration}</span>,
+              <span key="p" className="text-gold">{service.price_from}</span>,
+              <div key="a" className="flex items-center justify-end gap-4">
+                <Link href={`/services/${service.id}/edit`} className="text-sm text-gold transition hover:text-gold-soft">
+                  Edit
+                </Link>
+                <DeleteServiceButton id={service.id} title={service.title} />
+              </div>,
+            ],
+          }))}
+        />
       ) : null}
     </>
   );

@@ -1,21 +1,26 @@
 import Image from "next/image";
 import Link from "next/link";
 import type { Specialist } from "@/lib/specialists";
+import SpecialistAvatar from "@/components/SpecialistAvatar";
 
 export default function SpecialistCard({ person }: { person: Specialist }) {
   return (
     <Link
       href={`/specialists/${person.slug}`}
-      className="group flex min-w-0 flex-col overflow-hidden rounded-[1.25rem] bg-surface-elevated transition hover:bg-surface sm:rounded-[1.75rem] lg:rounded-[2rem]"
+      className="group flex w-full min-w-0 flex-col overflow-hidden rounded-[1.25rem] bg-surface-elevated transition hover:bg-surface sm:rounded-[1.75rem] lg:rounded-[2rem]"
     >
       <div className="relative aspect-[3/4] overflow-hidden">
-        <Image
-          src={person.image}
-          alt={person.name}
-          fill
-          className="object-cover object-top transition duration-700 group-hover:scale-105"
-          sizes="(max-width: 1024px) 50vw, 25vw"
-        />
+        {person.image ? (
+          <Image
+            src={person.image}
+            alt={person.name}
+            fill
+            className="object-cover object-top transition duration-700 group-hover:scale-105"
+            sizes="(max-width: 1024px) 50vw, 25vw"
+          />
+        ) : (
+          <SpecialistAvatar name={person.name} />
+        )}
         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
         <span className="absolute top-3 right-3 rounded-full bg-gold/90 px-2.5 py-1 text-[10px] font-medium tracking-wide text-background uppercase sm:text-xs">
           {person.experience}

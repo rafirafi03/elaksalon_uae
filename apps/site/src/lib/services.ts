@@ -1,18 +1,26 @@
+import { cacheLife } from "next/cache";
+import type { ServiceRow } from "@elak/db";
+import { getPublicSupabase } from "@/lib/supabase";
+import { getOfferIndex, type ItemOffer } from "@/lib/offers";
 import { images } from "@/lib/images";
 import { slugify } from "@/lib/slug";
 
 export type Service = {
+  /** Current + upcoming offers (filter by time on the client). */
+  offers?: ItemOffer[];
   slug: string;
   title: string;
   description: string;
   image: string;
   category: string;
+  /** Slug of the service category (for filtering). */
+  categorySlug: string;
   duration: string;
   priceFrom: string;
   details: string[];
 };
 
-export const services: Service[] = [
+const fallbackServiceData: Omit<Service, "categorySlug">[] = [
   {
     slug: slugify("Hair Care"),
     title: "Hair Care",
@@ -99,10 +107,51 @@ export const services: Service[] = [
   },
 ];
 
-export function getServiceBySlug(slug: string) {
-  return services.find((s) => s.slug === slug);
+const fallbackServices: Service[] = fallbackServiceData.map((s) => ({ ...s, categorySlug: slugify(s.category) }));
+
+function fromRow(row: ServiceRow & { service_categories?: { slug: string; name: string } | null }): Service {
+  return {
+    slug: row.slug,
+    title: row.title,
+    description: row.description,
+    image: row.image_url,
+    category: row.service_categories?.name ?? row.category,
+    categorySlug: row.service_categories?.slug ?? slugify(row.category),
+    duration: row.duration,
+    priceFrom: row.price_from,
+    details: row.details ?? [],
+  };
 }
 
-export function getAllServiceSlugs() {
-  return services.map((s) => s.slug);
+/** All services from Supabase (newest last). Falls back to built-in data if Supabase is unavailable. */
+async function loadServices(): Promise<Service[]> {
+  "use cache";
+  cacheLife("minutes");
+
+  const supabase = getPublicSupabase();
+  if (!supabase) return fallbackServices;
+
+  try {
+    const { data, error } = await supabase.from("services").select("*, service_categories(slug, name)")
+      .order("sort_order", { ascending: true })
+      .order("created_at", { ascending: false });
+    if (error || !data) {
+      console.error("[site] services load failed", error);
+      return fallbackServices;
+    }
+    return data.map(fromRow);
+  } catch (error) {
+    console.error("[site] services load failed", error);
+    return fallbackServices;
+  }
+}
+
+export async function getServiceBySlug(slug: string): Promise<Service | undefined> {
+  return (await getServices()).find((item) => item.slug === slug);
+}
+
+/** Services with their offers attached. */
+export async function getServices(): Promise<Service[]> {
+  const [items, offers] = await Promise.all([loadServices(), getOfferIndex()]);
+  return items.map((item) => ({ ...item, offers: offers[`service:${item.slug}`] ?? [] }));
 }

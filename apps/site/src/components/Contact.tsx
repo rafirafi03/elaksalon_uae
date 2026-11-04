@@ -6,7 +6,6 @@ import { getCompanySettings } from "@/lib/company";
 
 export default async function Contact() {
   const company = await getCompanySettings();
-  const mailHref = company.email ? `mailto:${company.email}` : "mailto:hello@elaksalon.ae";
 
   return (
     <section id="contact" className="py-14 lg:py-20">
@@ -24,7 +23,7 @@ export default async function Contact() {
               </div>
             )}
             <a
-              href={mailHref}
+              href="/contact#message"
               className="mt-6 inline-flex items-center justify-center gap-2 self-center rounded-full bg-gold px-6 py-3 text-sm font-medium text-background transition hover:bg-gold-soft lg:mt-8 lg:self-start"
             >
               Contact Us

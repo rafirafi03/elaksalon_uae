@@ -4,7 +4,7 @@ import { images } from "@/lib/images";
 
 export default function ProductFeature() {
   return (
-    <section className="py-14 lg:py-20">
+    <section className="py-8 lg:py-12">
       <Container>
         <div className="relative aspect-[4/3] overflow-hidden rounded-[2rem] rounded-tr-[3rem] sm:aspect-[16/9] lg:aspect-[21/9] lg:rounded-[2.5rem] lg:rounded-tr-[4rem]">
           <Image

@@ -2,13 +2,14 @@ import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import Container from "@/components/Container";
 import ServiceCard from "@/components/ServiceCard";
-import { services } from "@/lib/services";
+import { getServices } from "@/lib/services";
 
-export default function Services() {
+export default async function Services() {
+  const services = await getServices();
   const preview = services.slice(0, 4);
 
   return (
-    <section id="services" className="py-14 lg:py-20">
+    <section id="services" className="py-8 lg:py-12">
       <Container>
         <div className="mb-8 flex flex-col gap-3 lg:mb-12 lg:flex-row lg:items-end lg:justify-between">
           <div>
@@ -33,7 +34,7 @@ export default function Services() {
 
         <div className="grid grid-cols-2 gap-3 sm:gap-5 lg:grid-cols-4 lg:gap-6">
           {preview.map((service) => (
-            <ServiceCard key={service.title} service={service} />
+            <ServiceCard key={service.slug} service={service} />
           ))}
         </div>
       </Container>

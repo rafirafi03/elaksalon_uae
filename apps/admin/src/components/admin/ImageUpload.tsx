@@ -2,7 +2,7 @@
 
 import { useRef, useState, useTransition } from "react";
 import { ImagePlus, Loader2, Link2 } from "lucide-react";
-import { uploadMedia } from "@/lib/upload";
+import { deleteUploadedMedia, uploadMedia } from "@/lib/upload";
 
 type Props = {
   name?: string;
@@ -19,6 +19,13 @@ export default function ImageUpload({
 }: Props) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [url, setUrl] = useState(defaultValue);
+  // Image uploaded in this form session but not saved yet (safe to delete if replaced/removed).
+  const freshUpload = useRef<string | null>(null);
+
+  function discardFreshUpload() {
+    if (freshUpload.current) void deleteUploadedMedia(freshUpload.current);
+    freshUpload.current = null;
+  }
   const [error, setError] = useState<string | null>(null);
   const [mode, setMode] = useState<"upload" | "url">("upload");
   const [pending, startTransition] = useTransition();
@@ -30,13 +37,25 @@ export default function ImageUpload({
     body.set("file", file);
     body.set("folder", folder);
 
+    if (file.size > 5 * 1024 * 1024) {
+      setError("Please choose an image under 5MB.");
+      return;
+    }
+
     startTransition(async () => {
-      const result = await uploadMedia(body);
-      if (result.error) {
-        setError(result.error);
-        return;
+      try {
+        const result = await uploadMedia(body);
+        if (result.error) setError(result.error);
+        else if (result.url) {
+          discardFreshUpload();
+          freshUpload.current = result.url;
+          setUrl(result.url);
+        }
+      } catch {
+        setError("Image upload failed. Check your connection and try again.");
+      } finally {
+        if (inputRef.current) inputRef.current.value = "";
       }
-      if (result.url) setUrl(result.url);
     });
   }
 
@@ -122,6 +141,7 @@ export default function ImageUpload({
         <button
           type="button"
           onClick={() => {
+            discardFreshUpload();
             setUrl("");
             setError(null);
             if (inputRef.current) inputRef.current.value = "";

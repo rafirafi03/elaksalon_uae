@@ -1,4 +1,4 @@
-import { notFound } from "next/navigation";
+import { notFound, unstable_rethrow } from "next/navigation";
 import { connection } from "next/server";
 import PageHeader from "@/components/admin/PageHeader";
 import ErrorState from "@/components/admin/ErrorState";
@@ -25,7 +25,7 @@ export default async function EditProductPage({ params }: Params) {
   }
 
   try {
-    const supabase = getAdminSupabase();
+    const supabase = await getAdminSupabase();
     const { data: product, error } = await supabase.from("products").select("*").eq("id", id).maybeSingle();
 
     if (error) {
@@ -53,6 +53,7 @@ export default async function EditProductPage({ params }: Params) {
       </>
     );
   } catch (error) {
+    unstable_rethrow(error);
     logAdminError("products.edit", error);
     return (
       <>

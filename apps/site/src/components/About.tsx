@@ -6,15 +6,15 @@ import { images } from "@/lib/images";
 
 export default function About() {
   return (
-    <section id="about" className="py-14 lg:py-24">
+    <section id="about" className="py-8 lg:py-12">
       <Container className="grid items-center gap-10 sm:gap-12 lg:grid-cols-2 lg:gap-16">
-        <div className="relative mx-auto aspect-[4/5] w-full max-w-sm overflow-hidden blob-mask-u lg:mx-0 lg:max-w-md">
+        <div className="relative mx-auto aspect-[4/3] w-full max-w-lg overflow-hidden blob-mask-u lg:mx-0 lg:max-w-none">
           <Image
             src={images.about}
-            alt="Confident gentleman with a fresh cut"
+            alt="Inside the ELAK salon"
             fill
-            className="object-cover"
-            sizes="(max-width: 1024px) 90vw, 420px"
+            className="object-cover object-[30%_center]"
+            sizes="(max-width: 1024px) 90vw, 600px"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-background via-background/10 to-transparent lg:from-transparent" />
         </div>

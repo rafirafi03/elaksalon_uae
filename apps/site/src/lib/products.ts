@@ -1,7 +1,13 @@
+import { cacheLife } from "next/cache";
+import type { ProductRow } from "@elak/db";
+import { getPublicSupabase } from "@/lib/supabase";
+import { getOfferIndex, type ItemOffer } from "@/lib/offers";
 import { images } from "@/lib/images";
 import { slugify } from "@/lib/slug";
 
 export type Product = {
+  /** Current + upcoming offers (filter by time on the client). */
+  offers?: ItemOffer[];
   slug: string;
   name: string;
   brand: string;
@@ -12,7 +18,7 @@ export type Product = {
   details: string[];
 };
 
-export const products: Product[] = [
+const fallbackProducts: Product[] = [
   {
     slug: slugify("Matte Pomade"),
     name: "Matte Pomade",
@@ -103,10 +109,48 @@ export const products: Product[] = [
   },
 ];
 
-export function getProductBySlug(slug: string) {
-  return products.find((p) => p.slug === slug);
+function fromRow(row: ProductRow): Product {
+  return {
+    slug: row.slug,
+    name: row.name,
+    brand: row.brand,
+    price: row.price,
+    image: row.image_url,
+    category: row.category,
+    description: row.description,
+    details: row.details ?? [],
+  };
 }
 
-export function getAllProductSlugs() {
-  return products.map((p) => p.slug);
+/** All products from Supabase (newest last). Falls back to built-in data if Supabase is unavailable. */
+async function loadProducts(): Promise<Product[]> {
+  "use cache";
+  cacheLife("minutes");
+
+  const supabase = getPublicSupabase();
+  if (!supabase) return fallbackProducts;
+
+  try {
+    const { data, error } = await supabase.from("products").select("*")
+      .order("sort_order", { ascending: true })
+      .order("created_at", { ascending: false });
+    if (error || !data) {
+      console.error("[site] products load failed", error);
+      return fallbackProducts;
+    }
+    return data.map(fromRow);
+  } catch (error) {
+    console.error("[site] products load failed", error);
+    return fallbackProducts;
+  }
+}
+
+export async function getProductBySlug(slug: string): Promise<Product | undefined> {
+  return (await getProducts()).find((item) => item.slug === slug);
+}
+
+/** Products with their offers attached. */
+export async function getProducts(): Promise<Product[]> {
+  const [items, offers] = await Promise.all([loadProducts(), getOfferIndex()]);
+  return items.map((item) => ({ ...item, offers: offers[`product:${item.slug}`] ?? [] }));
 }

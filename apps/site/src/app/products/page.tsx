@@ -4,27 +4,26 @@ import Footer from "@/components/Footer";
 import PageShell from "@/components/PageShell";
 import Container from "@/components/Container";
 import ProductsCatalog from "@/components/ProductsCatalog";
+import { getProducts } from "@/lib/products";
+import { getCompanySettings } from "@/lib/company";
 
 export const metadata: Metadata = {
   title: "Products | ELAK Men's Salon UAE",
   description: "Shop premium men's grooming products — pomades, beard oils, and more at ELAK.",
 };
 
-export default function ProductsPage() {
+export default async function ProductsPage() {
+  const [products, company] = await Promise.all([getProducts(), getCompanySettings()]);
   return (
     <PageShell>
       <Header />
       <main className="pt-24 pb-14 lg:pt-28 lg:pb-20">
         <Container>
-          <p className="text-xs tracking-[0.25em] text-gold uppercase">Shop</p>
-          <h1 className="mt-2 font-serif text-4xl text-cream sm:text-5xl lg:text-6xl">
+          <h1 className="font-serif text-2xl text-cream sm:text-3xl">
             Our Products
           </h1>
-          <p className="mt-3 max-w-lg text-sm text-muted lg:text-base">
-            Professional grooming essentials for hair, beard, and skin — curated for gentlemen.
-          </p>
-          <div className="mt-10">
-            <ProductsCatalog />
+          <div className="mt-6">
+            <ProductsCatalog products={products} whatsappNumber={company.whatsapp_number} />
           </div>
         </Container>
       </main>

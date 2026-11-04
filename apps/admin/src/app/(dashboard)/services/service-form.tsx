@@ -1,26 +1,29 @@
 "use client";
 
-import { useActionState } from "react";
+import { useFormAction } from "@/lib/use-form-action";
 import Link from "next/link";
 import type { ServiceRow } from "@elak/db";
 import ImageUpload from "@/components/admin/ImageUpload";
 import FormError from "@/components/admin/FormError";
+import Select from "@/components/admin/Select";
 import type { ServiceActionState } from "./actions";
+import type { CategoryOption } from "./data";
 
 const initialState: ServiceActionState = {};
 
 type Props = {
   service?: ServiceRow;
+  categories: CategoryOption[];
   action: (prev: ServiceActionState, formData: FormData) => Promise<ServiceActionState>;
   submitLabel: string;
 };
 
-export default function ServiceForm({ service, action, submitLabel }: Props) {
-  const [state, formAction, pending] = useActionState(action, initialState);
+export default function ServiceForm({ service, categories, action, submitLabel }: Props) {
+  const [state, formAction, pending] = useFormAction(action, initialState);
 
   return (
     <form
-      action={formAction}
+      onSubmit={formAction}
       className="max-w-4xl space-y-8 rounded-[2rem] bg-surface-elevated p-6 sm:p-8 lg:p-10"
     >
       <FormError message={state.error} />
@@ -30,7 +33,23 @@ export default function ServiceForm({ service, action, submitLabel }: Props) {
           <Field label="Title" name="title" defaultValue={service?.title} required />
           <Field label="Slug" name="slug" defaultValue={service?.slug} hint="Optional — auto from title" />
           <div className="grid gap-5 sm:grid-cols-2">
-            <Field label="Category" name="category" defaultValue={service?.category} placeholder="Hair" required />
+            <div>
+              <span className="admin-label">Category</span>
+              <Select
+                name="category_id"
+                aria-label="Category"
+                required
+                defaultValue={service?.category_id ?? ""}
+                placeholder={categories.length ? "Select a category" : "No categories yet"}
+                disabled={categories.length === 0}
+                options={categories.map((c) => ({ value: c.id, label: c.name }))}
+              />
+              {categories.length === 0 ? (
+                <Link href="/categories/new" className="mt-2 inline-block text-xs text-gold hover:text-gold-soft">
+                  + Create a category first
+                </Link>
+              ) : null}
+            </div>
             <Field
               label="Duration"
               name="duration"
@@ -40,7 +59,7 @@ export default function ServiceForm({ service, action, submitLabel }: Props) {
             />
           </div>
           <Field
-            label="Starting price"
+            label="Price"
             name="price_from"
             defaultValue={service?.price_from}
             placeholder="AED 80"

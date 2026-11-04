@@ -3,9 +3,15 @@
 import { useMemo, useState } from "react";
 import ProductCard from "@/components/ProductCard";
 import SearchInput from "@/components/SearchInput";
-import { products } from "@/lib/products";
+import type { Product } from "@/lib/products";
 
-export default function ProductsCatalog() {
+export default function ProductsCatalog({
+  products,
+  whatsappNumber,
+}: {
+  products: Product[];
+  whatsappNumber?: string;
+}) {
   const [query, setQuery] = useState("");
 
   const filtered = useMemo(() => {
@@ -18,7 +24,7 @@ export default function ProductsCatalog() {
         p.category.toLowerCase().includes(q) ||
         p.price.toLowerCase().includes(q),
     );
-  }, [query]);
+  }, [query, products]);
 
   return (
     <div>
@@ -39,7 +45,7 @@ export default function ProductsCatalog() {
       ) : (
         <div className="mt-8 grid grid-cols-2 gap-4 sm:gap-5 md:grid-cols-3 lg:grid-cols-4 lg:gap-6">
           {filtered.map((product) => (
-            <ProductCard key={product.name} product={product} />
+            <ProductCard key={product.slug} product={product} whatsappNumber={whatsappNumber} />
           ))}
         </div>
       )}

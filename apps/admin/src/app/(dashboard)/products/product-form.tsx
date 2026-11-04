@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState } from "react";
+import { useFormAction } from "@/lib/use-form-action";
 import Link from "next/link";
 import type { ProductRow } from "@elak/db";
 import ImageUpload from "@/components/admin/ImageUpload";
@@ -16,11 +16,11 @@ type Props = {
 };
 
 export default function ProductForm({ product, action, submitLabel }: Props) {
-  const [state, formAction, pending] = useActionState(action, initialState);
+  const [state, formAction, pending] = useFormAction(action, initialState);
 
   return (
     <form
-      action={formAction}
+      onSubmit={formAction}
       className="max-w-4xl space-y-8 rounded-[2rem] bg-surface-elevated p-6 sm:p-8 lg:p-10"
     >
       <FormError message={state.error} />

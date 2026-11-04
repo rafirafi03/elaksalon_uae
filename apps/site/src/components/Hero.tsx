@@ -100,16 +100,6 @@ export default function Hero() {
                   Trusted by 1,000+ happy clients
                 </p>
               </div>
-
-              <button
-                type="button"
-                className="flex items-center gap-2 text-sm text-cream transition hover:text-gold"
-              >
-                <span className="flex h-10 w-10 items-center justify-center rounded-full border border-gold/50 text-gold">
-                  <Play size={14} fill="currentColor" />
-                </span>
-                Watch Our Story
-              </button>
             </div>
           </SlideIn>
         </div>

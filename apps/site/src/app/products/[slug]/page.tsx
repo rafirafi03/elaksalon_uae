@@ -8,19 +8,22 @@ import Footer from "@/components/Footer";
 import PageShell from "@/components/PageShell";
 import Container from "@/components/Container";
 import ProductCard from "@/components/ProductCard";
-import { getProductBySlug, products } from "@/lib/products";
+import { getProductBySlug, getProducts } from "@/lib/products";
 import { getCompanySettings } from "@/lib/company";
-import { productWhatsAppUrl } from "@/lib/whatsapp";
+import WhatsAppLink from "@/components/WhatsAppLink";
+import { OfferBanner, OfferPrice } from "@/components/OfferTags";
 
 export async function generateStaticParams() {
-  return products.map((p) => ({ slug: p.slug }));
+  const params = (await getProducts()).map((item) => ({ slug: item.slug }));
+  // Cache Components requires at least one param; the placeholder simply 404s.
+  return params.length ? params : [{ slug: "__none" }];
 }
 
 type Params = { params: Promise<{ slug: string }> };
 
 export async function generateMetadata({ params }: Params): Promise<Metadata> {
   const { slug } = await params;
-  const product = getProductBySlug(slug);
+  const product = await getProductBySlug(slug);
   if (!product) return { title: "Product | ELAK" };
   return {
     title: `${product.name} | ELAK Products`,
@@ -30,11 +33,11 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
 
 export default async function ProductDetailPage({ params }: Params) {
   const { slug } = await params;
-  const product = getProductBySlug(slug);
+  const product = await getProductBySlug(slug);
   if (!product) notFound();
 
   const company = await getCompanySettings();
-  const related = products.filter((p) => p.slug !== product.slug).slice(0, 4);
+  const related = (await getProducts()).filter((p) => p.slug !== product.slug).slice(0, 4);
 
   return (
     <PageShell>
@@ -56,7 +59,7 @@ export default async function ProductDetailPage({ params }: Params) {
                 alt={product.name}
                 fill
                 priority
-                className="object-contain p-10"
+                className="object-cover"
                 sizes="(max-width: 1024px) 100vw, 50vw"
               />
             </div>
@@ -65,7 +68,10 @@ export default async function ProductDetailPage({ params }: Params) {
               <p className="text-xs tracking-[0.25em] text-gold uppercase">{product.category}</p>
               <p className="mt-3 text-sm tracking-wide text-muted uppercase">{product.brand}</p>
               <h1 className="mt-2 font-serif text-4xl text-cream sm:text-5xl">{product.name}</h1>
-              <p className="mt-4 text-2xl text-gold">{product.price}</p>
+              <p className="mt-4">
+                <OfferPrice price={product.price} offers={product.offers} className="text-2xl text-gold" />
+              </p>
+              <OfferBanner offers={product.offers} />
               <p className="mt-5 max-w-lg text-sm leading-relaxed text-muted lg:text-base">
                 {product.description}
               </p>
@@ -79,15 +85,14 @@ export default async function ProductDetailPage({ params }: Params) {
                 ))}
               </ul>
 
-              <a
-                href={productWhatsAppUrl(product, company.whatsapp_number)}
-                target="_blank"
-                rel="noopener noreferrer"
+              <WhatsAppLink
+                product={product}
+                whatsappNumber={company.whatsapp_number}
                 className="mt-8 inline-flex items-center gap-2 rounded-full bg-gold px-6 py-3.5 text-sm font-medium text-background transition hover:bg-gold-soft"
               >
                 <ShoppingBag size={16} />
                 Buy on WhatsApp
-              </a>
+              </WhatsAppLink>
             </div>
           </div>
 
@@ -96,7 +101,7 @@ export default async function ProductDetailPage({ params }: Params) {
               <h2 className="font-serif text-2xl text-cream lg:text-3xl">You may also like</h2>
               <div className="mt-6 grid grid-cols-2 gap-4 sm:gap-5 md:grid-cols-3 lg:grid-cols-4 lg:gap-6">
                 {related.map((item) => (
-                  <ProductCard key={item.slug} product={item} />
+                  <ProductCard key={item.slug} product={item} whatsappNumber={company.whatsapp_number} />
                 ))}
               </div>
             </div>

@@ -4,7 +4,7 @@ import PageHeader from "@/components/admin/PageHeader";
 import ErrorState from "@/components/admin/ErrorState";
 import { getAdminSupabase, isSupabaseConfigured } from "@/lib/supabase";
 import { MSG, logAdminError } from "@/lib/messages";
-import CompanyForm from "./company-form";
+import CompanyDetails from "./company-details";
 
 export const instant = false;
 
@@ -18,7 +18,7 @@ export default async function CompanyPage() {
     failed = true;
   } else {
     try {
-      const supabase = getAdminSupabase();
+      const supabase = await getAdminSupabase();
       const { data, error } = await supabase.from("company_settings").select("*").eq("id", 1).maybeSingle();
 
       if (error) {
@@ -44,7 +44,7 @@ export default async function CompanyPage() {
       {failed ? (
         <ErrorState description={MSG.loadFailed} retryHref="/company" />
       ) : (
-        <CompanyForm settings={settings} />
+        <CompanyDetails settings={settings} />
       )}
     </>
   );

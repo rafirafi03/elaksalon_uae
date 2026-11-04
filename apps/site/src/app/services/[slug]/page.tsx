@@ -7,20 +7,23 @@ import Header from "@/components/Header";
 import Footer from "@/components/Footer";
 import PageShell from "@/components/PageShell";
 import Container from "@/components/Container";
+import { OfferBanner, OfferPrice } from "@/components/OfferTags";
 import ServiceCard from "@/components/ServiceCard";
-import { getServiceBySlug, services } from "@/lib/services";
+import { getServiceBySlug, getServices } from "@/lib/services";
 import { getCompanySettings } from "@/lib/company";
-import { serviceWhatsAppUrl } from "@/lib/whatsapp";
+import WhatsAppLink from "@/components/WhatsAppLink";
 
 export async function generateStaticParams() {
-  return services.map((s) => ({ slug: s.slug }));
+  const params = (await getServices()).map((item) => ({ slug: item.slug }));
+  // Cache Components requires at least one param; the placeholder simply 404s.
+  return params.length ? params : [{ slug: "__none" }];
 }
 
 type Params = { params: Promise<{ slug: string }> };
 
 export async function generateMetadata({ params }: Params): Promise<Metadata> {
   const { slug } = await params;
-  const service = getServiceBySlug(slug);
+  const service = await getServiceBySlug(slug);
   if (!service) return { title: "Service | ELAK" };
   return {
     title: `${service.title} | ELAK Services`,
@@ -30,11 +33,11 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
 
 export default async function ServiceDetailPage({ params }: Params) {
   const { slug } = await params;
-  const service = getServiceBySlug(slug);
+  const service = await getServiceBySlug(slug);
   if (!service) notFound();
 
   const company = await getCompanySettings();
-  const related = services.filter((s) => s.slug !== service.slug).slice(0, 3);
+  const related = (await getServices()).filter((s) => s.slug !== service.slug).slice(0, 3);
 
   return (
     <PageShell>
@@ -74,9 +77,10 @@ export default async function ServiceDetailPage({ params }: Params) {
                   {service.duration}
                 </span>
                 <span className="inline-flex items-center rounded-full border border-gold/40 px-4 py-2 text-gold">
-                  From {service.priceFrom}
+                  <OfferPrice price={service.priceFrom} offers={service.offers} className="text-gold" />
                 </span>
               </div>
+              <OfferBanner offers={service.offers} />
 
               <ul className="mt-8 space-y-3">
                 {service.details.map((item) => (
@@ -87,15 +91,14 @@ export default async function ServiceDetailPage({ params }: Params) {
                 ))}
               </ul>
 
-              <a
-                href={serviceWhatsAppUrl(service, company.whatsapp_number)}
-                target="_blank"
-                rel="noopener noreferrer"
+              <WhatsAppLink
+                service={service}
+                whatsappNumber={company.whatsapp_number}
                 className="mt-8 inline-flex items-center gap-2 rounded-full bg-gold px-6 py-3.5 text-sm font-medium text-background transition hover:bg-gold-soft"
               >
                 <MessageCircle size={16} />
                 Book on WhatsApp
-              </a>
+              </WhatsAppLink>
             </div>
           </div>
 

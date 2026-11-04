@@ -1,3 +1,6 @@
+import { cacheLife } from "next/cache";
+import type { SpecialistRow } from "@elak/db";
+import { getPublicSupabase } from "@/lib/supabase";
 import { images } from "@/lib/images";
 import { slugify } from "@/lib/slug";
 
@@ -12,7 +15,7 @@ export type Specialist = {
   skills: string[];
 };
 
-export const specialists: Specialist[] = [
+const fallbackSpecialists: Specialist[] = [
   {
     slug: slugify("Omar Hassan"),
     name: "Omar Hassan",
@@ -77,10 +80,42 @@ export const specialists: Specialist[] = [
   },
 ];
 
-export function getSpecialistBySlug(slug: string) {
-  return specialists.find((s) => s.slug === slug);
+function fromRow(row: SpecialistRow): Specialist {
+  return {
+    slug: row.slug,
+    name: row.name,
+    role: row.role,
+    specialty: row.specialty,
+    experience: row.experience,
+    image: row.image_url,
+    bio: row.bio,
+    skills: row.skills ?? [],
+  };
 }
 
-export function getAllSpecialistSlugs() {
-  return specialists.map((s) => s.slug);
+/** All specialists from Supabase (newest last). Falls back to built-in data if Supabase is unavailable. */
+export async function getSpecialists(): Promise<Specialist[]> {
+  "use cache";
+  cacheLife("minutes");
+
+  const supabase = getPublicSupabase();
+  if (!supabase) return fallbackSpecialists;
+
+  try {
+    const { data, error } = await supabase.from("specialists").select("*")
+      .order("sort_order", { ascending: true })
+      .order("created_at", { ascending: false });
+    if (error || !data) {
+      console.error("[site] specialists load failed", error);
+      return fallbackSpecialists;
+    }
+    return data.map(fromRow);
+  } catch (error) {
+    console.error("[site] specialists load failed", error);
+    return fallbackSpecialists;
+  }
+}
+
+export async function getSpecialistBySlug(slug: string): Promise<Specialist | undefined> {
+  return (await getSpecialists()).find((item) => item.slug === slug);
 }

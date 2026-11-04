@@ -3,9 +3,9 @@
 import { useMemo, useState } from "react";
 import SpecialistCard from "@/components/SpecialistCard";
 import SearchInput from "@/components/SearchInput";
-import { specialists } from "@/lib/specialists";
+import type { Specialist } from "@/lib/specialists";
 
-export default function SpecialistsCatalog() {
+export default function SpecialistsCatalog({ specialists }: { specialists: Specialist[] }) {
   const [query, setQuery] = useState("");
 
   const filtered = useMemo(() => {
@@ -18,7 +18,7 @@ export default function SpecialistsCatalog() {
         p.specialty.toLowerCase().includes(q) ||
         p.experience.toLowerCase().includes(q),
     );
-  }, [query]);
+  }, [query, specialists]);
 
   return (
     <div>
@@ -39,7 +39,7 @@ export default function SpecialistsCatalog() {
       ) : (
         <div className="mt-8 grid grid-cols-2 gap-3 sm:gap-5 lg:grid-cols-3 lg:gap-6 xl:grid-cols-4">
           {filtered.map((person) => (
-            <SpecialistCard key={person.name} person={person} />
+            <SpecialistCard key={person.slug} person={person} />
           ))}
         </div>
       )}

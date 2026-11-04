@@ -27,13 +27,13 @@ export default function AboutPage() {
         </Container>
 
         <Container className="mt-12 grid items-center gap-10 lg:mt-16 lg:grid-cols-2 lg:gap-16">
-          <div className="relative mx-auto aspect-[4/5] w-full max-w-md overflow-hidden rounded-[2rem] lg:mx-0">
+          <div className="relative mx-auto aspect-[4/3] w-full max-w-xl overflow-hidden rounded-[2rem] lg:mx-0 lg:max-w-none">
             <Image
               src={images.about}
-              alt="Confident gentleman with a fresh cut"
+              alt="Inside the ELAK salon"
               fill
-              className="object-cover"
-              sizes="(max-width: 1024px) 90vw, 480px"
+              className="object-cover object-[30%_center]"
+              sizes="(max-width: 1024px) 90vw, 600px"
               priority
             />
           </div>
@@ -73,9 +73,9 @@ export default function AboutPage() {
 
         <Container className="mt-16 grid gap-4 sm:grid-cols-3 lg:mt-20 lg:gap-6">
           {[
-            { label: "Years of craft", value: "5+" },
+            { label: "Years of craft", value: "28+" },
             { label: "Happy clients", value: "1000+" },
-            { label: "Grooming experts", value: "20+" },
+            { label: "Grooming experts", value: "7+" },
           ].map((stat) => (
             <div
               key={stat.label}

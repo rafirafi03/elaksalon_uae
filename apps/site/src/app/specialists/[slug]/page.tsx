@@ -8,17 +8,20 @@ import Footer from "@/components/Footer";
 import PageShell from "@/components/PageShell";
 import Container from "@/components/Container";
 import SpecialistCard from "@/components/SpecialistCard";
-import { getSpecialistBySlug, specialists } from "@/lib/specialists";
+import SpecialistAvatar from "@/components/SpecialistAvatar";
+import { getSpecialistBySlug, getSpecialists } from "@/lib/specialists";
 
 export async function generateStaticParams() {
-  return specialists.map((s) => ({ slug: s.slug }));
+  const params = (await getSpecialists()).map((item) => ({ slug: item.slug }));
+  // Cache Components requires at least one param; the placeholder simply 404s.
+  return params.length ? params : [{ slug: "__none" }];
 }
 
 type Params = { params: Promise<{ slug: string }> };
 
 export async function generateMetadata({ params }: Params): Promise<Metadata> {
   const { slug } = await params;
-  const person = getSpecialistBySlug(slug);
+  const person = await getSpecialistBySlug(slug);
   if (!person) return { title: "Specialist | ELAK" };
   return {
     title: `${person.name} | ELAK Specialists`,
@@ -28,10 +31,10 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
 
 export default async function SpecialistDetailPage({ params }: Params) {
   const { slug } = await params;
-  const person = getSpecialistBySlug(slug);
+  const person = await getSpecialistBySlug(slug);
   if (!person) notFound();
 
-  const related = specialists.filter((s) => s.slug !== person.slug).slice(0, 3);
+  const related = (await getSpecialists()).filter((s) => s.slug !== person.slug).slice(0, 3);
 
   return (
     <PageShell>
@@ -48,14 +51,18 @@ export default async function SpecialistDetailPage({ params }: Params) {
 
           <div className="mt-8 grid items-start gap-10 lg:mt-12 lg:grid-cols-[0.9fr_1.1fr] lg:gap-16">
             <div className="relative mx-auto aspect-[3/4] w-full max-w-md overflow-hidden rounded-[2rem] lg:mx-0 lg:rounded-[2.5rem]">
-              <Image
-                src={person.image}
-                alt={person.name}
-                fill
-                priority
-                className="object-cover object-top"
-                sizes="(max-width: 1024px) 90vw, 420px"
-              />
+              {person.image ? (
+                <Image
+                  src={person.image}
+                  alt={person.name}
+                  fill
+                  priority
+                  className="object-cover object-top"
+                  sizes="(max-width: 1024px) 90vw, 420px"
+                />
+              ) : (
+                <SpecialistAvatar name={person.name} size="lg" />
+              )}
             </div>
 
             <div>

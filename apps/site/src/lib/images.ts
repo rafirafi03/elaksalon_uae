@@ -12,7 +12,7 @@ export const images = {
   hairStyling: "https://images.unsplash.com/photo-1605497788044-5a32c7078486?auto=format&fit=crop&w=1000&q=80",
 
   // About — confident man
-  about: "https://images.unsplash.com/photo-1480455624313-e29b44bbfde1?auto=format&fit=crop&w=1000&q=80",
+  about: "/about.png",
 
   // Gallery — men's barbershop interior
   interior: "https://images.unsplash.com/photo-1622286342621-4bd786c2447c?auto=format&fit=crop&w=1600&q=80",

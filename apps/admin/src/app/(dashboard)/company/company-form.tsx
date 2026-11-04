@@ -1,18 +1,34 @@
 "use client";
 
-import { useActionState } from "react";
+import { useFormAction } from "@/lib/use-form-action";
 import type { CompanySettingsRow } from "@elak/db";
 import FormError from "@/components/admin/FormError";
+import SocialLinksField from "./social-links-field";
 import { saveCompanySettings, type CompanyActionState } from "./actions";
 
 const initialState: CompanyActionState = {};
 
-export default function CompanyForm({ settings }: { settings?: CompanySettingsRow | null }) {
-  const [state, formAction, pending] = useActionState(saveCompanySettings, initialState);
+export default function CompanyForm({
+  settings,
+  onCancel,
+  onSaved,
+}: {
+  settings?: CompanySettingsRow | null;
+  onCancel?: () => void;
+  onSaved?: (message: string) => void;
+}) {
+  const [state, formAction, pending] = useFormAction(
+    async (prev: CompanyActionState, formData: FormData) => {
+      const result = await saveCompanySettings(prev, formData);
+      if (result.success) onSaved?.(result.success);
+      return result;
+    },
+    initialState,
+  );
 
   return (
     <form
-      action={formAction}
+      onSubmit={formAction}
       className="max-w-4xl space-y-8 rounded-[2rem] bg-surface-elevated p-6 sm:p-8 lg:p-10"
     >
       <FormError message={state.error} />
@@ -80,7 +96,12 @@ export default function CompanyForm({ settings }: { settings?: CompanySettingsRo
         />
       </section>
 
-      <div className="border-t border-border/60 pt-6">
+      <section className="space-y-5 border-t border-border/60 pt-8">
+        <h2 className="font-serif text-xl text-cream">Social media</h2>
+        <SocialLinksField defaultValue={settings?.social_links ?? []} />
+      </section>
+
+      <div className="flex flex-wrap items-center gap-3 border-t border-border/60 pt-6">
         <button
           type="submit"
           disabled={pending}
@@ -88,6 +109,16 @@ export default function CompanyForm({ settings }: { settings?: CompanySettingsRo
         >
           {pending ? "Saving…" : "Save company details"}
         </button>
+        {onCancel ? (
+          <button
+            type="button"
+            onClick={onCancel}
+            disabled={pending}
+            className="rounded-full border border-border px-6 py-3 text-sm font-medium text-cream transition hover:border-gold/60 disabled:opacity-60"
+          >
+            Cancel
+          </button>
+        ) : null}
       </div>
     </form>
   );

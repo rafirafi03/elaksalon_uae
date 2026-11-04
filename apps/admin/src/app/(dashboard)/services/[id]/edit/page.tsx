@@ -1,4 +1,4 @@
-import { notFound } from "next/navigation";
+import { notFound, unstable_rethrow } from "next/navigation";
 import { connection } from "next/server";
 import PageHeader from "@/components/admin/PageHeader";
 import ErrorState from "@/components/admin/ErrorState";
@@ -6,6 +6,7 @@ import { getAdminSupabase, isSupabaseConfigured } from "@/lib/supabase";
 import { MSG, logAdminError } from "@/lib/messages";
 import ServiceForm from "../../service-form";
 import { updateService } from "../../actions";
+import { loadCategoryOptions } from "../../data";
 
 export const instant = false;
 
@@ -25,10 +26,13 @@ export default async function EditServicePage({ params }: Params) {
   }
 
   try {
-    const supabase = getAdminSupabase();
-    const { data: service, error } = await supabase.from("services").select("*").eq("id", id).maybeSingle();
+    const supabase = await getAdminSupabase();
+    const [{ data: service, error }, categories] = await Promise.all([
+      supabase.from("services").select("*").eq("id", id).maybeSingle(),
+      loadCategoryOptions(),
+    ]);
 
-    if (error) {
+    if (error || !categories) {
       logAdminError("services.edit", error);
       return (
         <>
@@ -49,10 +53,11 @@ export default async function EditServicePage({ params }: Params) {
           title={service.title}
           description="Update service details or replace the image."
         />
-        <ServiceForm service={service} action={action} submitLabel="Save changes" />
+        <ServiceForm service={service} categories={categories} action={action} submitLabel="Save changes" />
       </>
     );
   } catch (error) {
+    unstable_rethrow(error);
     logAdminError("services.edit", error);
     return (
       <>

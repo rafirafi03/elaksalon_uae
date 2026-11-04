@@ -4,6 +4,7 @@ import Footer from "@/components/Footer";
 import PageShell from "@/components/PageShell";
 import Container from "@/components/Container";
 import SpecialistsCatalog from "@/components/SpecialistsCatalog";
+import { getSpecialists } from "@/lib/specialists";
 
 export const metadata: Metadata = {
   title: "Specialists | ELAK Men's Salon UAE",
@@ -11,21 +12,18 @@ export const metadata: Metadata = {
     "Meet the ELAK team — expert barbers and grooming specialists for cuts, beards, and shaves.",
 };
 
-export default function SpecialistsPage() {
+export default async function SpecialistsPage() {
+  const specialists = await getSpecialists();
   return (
     <PageShell>
       <Header />
       <main className="pt-24 pb-14 lg:pt-28 lg:pb-20">
         <Container>
-          <p className="text-xs tracking-[0.25em] text-gold uppercase">Our Team</p>
-          <h1 className="mt-2 font-serif text-4xl text-cream sm:text-5xl lg:text-6xl">
-            Specialists
+          <h1 className="font-serif text-2xl text-cream sm:text-3xl">
+            Our Specialists
           </h1>
-          <p className="mt-3 max-w-lg text-sm text-muted lg:text-base">
-            Find the right expert for your cut, beard, or shave — search by name, role, or specialty.
-          </p>
-          <div className="mt-10">
-            <SpecialistsCatalog />
+          <div className="mt-6">
+            <SpecialistsCatalog specialists={specialists} />
           </div>
         </Container>
       </main>

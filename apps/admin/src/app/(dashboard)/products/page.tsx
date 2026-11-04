@@ -8,6 +8,8 @@ import ErrorState from "@/components/admin/ErrorState";
 import { getAdminSupabase, isSupabaseConfigured } from "@/lib/supabase";
 import { MSG, logAdminError } from "@/lib/messages";
 import DeleteProductButton from "./delete-button";
+import SortableTable from "@/components/admin/SortableTable";
+import { bulkDeleteProducts, reorderProducts } from "./actions";
 
 export const instant = false;
 
@@ -21,10 +23,11 @@ export default async function AdminProductsPage() {
     failed = true;
   } else {
     try {
-      const supabase = getAdminSupabase();
+      const supabase = await getAdminSupabase();
       const { data, error } = await supabase
         .from("products")
         .select("*")
+        .order("sort_order", { ascending: true })
         .order("created_at", { ascending: false });
 
       if (error) {
@@ -70,57 +73,42 @@ export default async function AdminProductsPage() {
       ) : null}
 
       {!failed && products.length > 0 ? (
-        <div className="overflow-hidden rounded-[1.75rem] bg-surface-elevated">
-          <div className="overflow-x-auto">
-            <table className="min-w-full text-left text-sm">
-              <thead>
-                <tr className="border-b border-border/70 text-[10px] tracking-[0.2em] text-muted uppercase">
-                  <th className="px-5 py-4 font-medium">Product</th>
-                  <th className="px-4 py-4 font-medium">Category</th>
-                  <th className="px-4 py-4 font-medium">Price</th>
-                  <th className="hidden px-4 py-4 font-medium md:table-cell">Slug</th>
-                  <th className="px-5 py-4 font-medium text-right">Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {products.map((product) => (
-                  <tr key={product.id} className="border-t border-border/50 transition hover:bg-surface">
-                    <td className="px-5 py-4">
-                      <div className="flex items-center gap-3">
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img
-                          src={product.image_url}
-                          alt=""
-                          className="h-12 w-12 rounded-2xl bg-surface object-cover"
-                        />
-                        <div>
-                          <div className="font-serif text-base text-cream">{product.name}</div>
-                          <div className="text-xs tracking-wide text-muted uppercase">{product.brand}</div>
-                        </div>
-                      </div>
-                    </td>
-                    <td className="px-4 py-4 text-muted">{product.category}</td>
-                    <td className="px-4 py-4 text-gold">{product.price}</td>
-                    <td className="hidden px-4 py-4 font-mono text-xs text-muted md:table-cell">
-                      {product.slug}
-                    </td>
-                    <td className="px-5 py-4">
-                      <div className="flex items-center justify-end gap-4">
-                        <Link
-                          href={`/products/${product.id}/edit`}
-                          className="text-sm text-gold transition hover:text-gold-soft"
-                        >
-                          Edit
-                        </Link>
-                        <DeleteProductButton id={product.id} name={product.name} />
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        </div>
+        <SortableTable
+          itemType="product"
+          itemTypePlural="products"
+          onReorder={reorderProducts}
+          onBulkDelete={bulkDeleteProducts}
+          columns={[
+            { label: "Product" },
+            { label: "Category" },
+            { label: "Price" },
+            { label: "Slug", className: "hidden md:table-cell" },
+            { label: "Actions", className: "pr-5 text-right" },
+          ]}
+          rows={products.map((product) => ({
+            id: product.id,
+            label: product.name,
+            cells: [
+              <div key="p" className="flex items-center gap-3">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img src={product.image_url} alt="" className="h-12 w-12 rounded-2xl bg-surface object-cover" />
+                <div>
+                  <div className="font-serif text-base text-cream">{product.name}</div>
+                  <div className="text-xs tracking-wide text-muted uppercase">{product.brand}</div>
+                </div>
+              </div>,
+              <span key="c" className="text-muted">{product.category}</span>,
+              <span key="pr" className="text-gold">{product.price}</span>,
+              <span key="s" className="font-mono text-xs text-muted">{product.slug}</span>,
+              <div key="a" className="flex items-center justify-end gap-4">
+                <Link href={`/products/${product.id}/edit`} className="text-sm text-gold transition hover:text-gold-soft">
+                  Edit
+                </Link>
+                <DeleteProductButton id={product.id} name={product.name} />
+              </div>,
+            ],
+          }))}
+        />
       ) : null}
     </>
   );

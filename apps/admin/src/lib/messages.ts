@@ -15,3 +15,13 @@ export const MSG = {
 export function logAdminError(scope: string, error: unknown) {
   console.error(`[admin:${scope}]`, error);
 }
+
+/** Friendly save error: detects duplicate slug (unique violation). */
+export function saveErrorMessage(error: unknown): string {
+  const code = (error as { code?: string } | null)?.code;
+  if (code === "42703" || code === "PGRST204" || code === "PGRST205") {
+    return "The database is missing a recent update. Run the latest SQL migration in Supabase, then try again.";
+  }
+  if (code === "23505") return "An item with this slug already exists. Change the title or slug.";
+  return MSG.saveFailed;
+}

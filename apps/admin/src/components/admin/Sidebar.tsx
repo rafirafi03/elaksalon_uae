@@ -2,15 +2,21 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Building2, LayoutDashboard, Package, Scissors, Users, X } from "lucide-react";
+import { Boxes, Building2, LayoutGrid, LayoutDashboard, LogOut, Package, Scissors, Star, Tag, UserRound, Users, X } from "lucide-react";
 import { cn } from "@/lib/cn";
+import { signOut } from "@/app/login/actions";
 
 const nav = [
   { href: "/", label: "Dashboard", icon: LayoutDashboard },
   { href: "/products", label: "Products", icon: Package },
+  { href: "/categories", label: "Categories", icon: LayoutGrid },
   { href: "/services", label: "Services", icon: Scissors },
+  { href: "/packages", label: "Packages", icon: Boxes },
   { href: "/specialists", label: "Specialists", icon: Users },
+  { href: "/offers", label: "Offers", icon: Tag },
+  { href: "/reviews", label: "Reviews", icon: Star },
   { href: "/company", label: "Company", icon: Building2 },
+  { href: "/account", label: "Account", icon: UserRound },
 ];
 
 export default function Sidebar({
@@ -87,6 +93,15 @@ export default function Sidebar({
           <p className="mt-1 text-xs leading-relaxed text-muted">
             Content for the public ELAK experience.
           </p>
+          <form action={signOut} className="mt-4">
+            <button
+              type="submit"
+              className="inline-flex items-center gap-2 text-xs tracking-wide text-muted uppercase transition hover:text-danger"
+            >
+              <LogOut size={14} strokeWidth={1.6} />
+              Sign out
+            </button>
+          </form>
         </div>
       </aside>
     </>

@@ -1,4 +1,4 @@
-import { notFound } from "next/navigation";
+import { notFound, unstable_rethrow } from "next/navigation";
 import { connection } from "next/server";
 import PageHeader from "@/components/admin/PageHeader";
 import ErrorState from "@/components/admin/ErrorState";
@@ -25,7 +25,7 @@ export default async function EditSpecialistPage({ params }: Params) {
   }
 
   try {
-    const supabase = getAdminSupabase();
+    const supabase = await getAdminSupabase();
     const { data: specialist, error } = await supabase
       .from("specialists")
       .select("*")
@@ -57,6 +57,7 @@ export default async function EditSpecialistPage({ params }: Params) {
       </>
     );
   } catch (error) {
+    unstable_rethrow(error);
     logAdminError("specialists.edit", error);
     return (
       <>
