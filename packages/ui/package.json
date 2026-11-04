@@ -8,7 +8,6 @@
     "./button": "./src/button.tsx"
   },
   "scripts": {
-    "build": "echo \"@elak/ui: source package\"",
     "lint": "echo \"@elak/ui: no lint yet\""
   },
   "peerDependencies": {

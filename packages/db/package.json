@@ -9,7 +9,6 @@
     "./client": "./src/client.ts"
   },
   "scripts": {
-    "build": "echo \"@elak/db: source package\"",
     "lint": "echo \"@elak/db: no lint yet\""
   },
   "dependencies": {
