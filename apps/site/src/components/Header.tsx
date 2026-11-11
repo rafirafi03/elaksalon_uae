@@ -19,28 +19,28 @@ const links = [
 
 export default function Header() {
   const [open, setOpen] = useState(false);
-  const [pastHero, setPastHero] = useState(false);
+  const [scrolled, setScrolled] = useState(false);
 
+  // Transparent only at the very top; solid as soon as the page scrolls.
   useEffect(() => {
-    const hero = document.getElementById("home");
-
-    const update = () => {
-      if (!hero) {
-        setPastHero(true);
-        return;
-      }
-      const heroBottom = hero.getBoundingClientRect().bottom;
-      setPastHero(heroBottom <= 80);
-    };
-
+    const update = () => setScrolled(window.scrollY > 8);
     update();
     window.addEventListener("scroll", update, { passive: true });
-    window.addEventListener("resize", update);
-    return () => {
-      window.removeEventListener("scroll", update);
-      window.removeEventListener("resize", update);
-    };
+    return () => window.removeEventListener("scroll", update);
   }, []);
+
+  // Close the mobile menu on Esc or when resizing to desktop width.
+  useEffect(() => {
+    if (!open) return;
+    const onKey = (e: KeyboardEvent) => e.key === "Escape" && setOpen(false);
+    const onResize = () => window.innerWidth >= 1280 && setOpen(false);
+    window.addEventListener("keydown", onKey);
+    window.addEventListener("resize", onResize);
+    return () => {
+      window.removeEventListener("keydown", onKey);
+      window.removeEventListener("resize", onResize);
+    };
+  }, [open]);
 
   useEffect(() => {
     document.body.style.overflow = open ? "hidden" : "";
@@ -49,11 +49,14 @@ export default function Header() {
     };
   }, [open]);
 
+  const solid = scrolled || open;
+
   return (
+    <>
     <header
       className={cn(
         "fixed inset-x-0 top-0 z-50 transition-all duration-300",
-        pastHero
+        solid
           ? "border-b border-border/40 bg-background/90 backdrop-blur-md"
           : "border-b border-transparent bg-transparent",
       )}
@@ -71,7 +74,7 @@ export default function Header() {
           />
         </Link>
 
-        <nav className="hidden items-center gap-8 lg:flex">
+        <nav className="hidden items-center gap-6 xl:flex 2xl:gap-8">
           {links.map((link) => (
             <a
               key={link.href}
@@ -89,32 +92,34 @@ export default function Header() {
             aria-label={open ? "Close menu" : "Open menu"}
             aria-expanded={open}
             onClick={() => setOpen((v) => !v)}
-            className="rounded-full p-2 text-gold transition hover:bg-white/5 lg:hidden"
+            className="rounded-full p-2 text-gold transition hover:bg-white/5 xl:hidden"
           >
             {open ? <X size={22} strokeWidth={1.5} /> : <Menu size={22} strokeWidth={1.5} />}
           </button>
           <Link
             href="/contact"
-            className="hidden rounded-full bg-gold px-5 py-2.5 text-sm font-medium text-background transition hover:bg-gold-soft lg:inline-flex"
+            className="hidden rounded-full bg-gold px-5 py-2.5 text-sm font-medium text-background transition hover:bg-gold-soft sm:inline-flex"
           >
             Book Now
           </Link>
         </div>
       </Container>
 
+    </header>
       <div
         className={cn(
-          "fixed inset-0 z-40 bg-background/95 backdrop-blur-md transition-all duration-500 lg:hidden",
+          "fixed inset-0 z-40 overflow-y-auto bg-background/97 backdrop-blur-md transition-opacity duration-300 xl:hidden",
           open ? "pointer-events-auto opacity-100" : "pointer-events-none opacity-0",
         )}
+        aria-hidden={!open}
       >
-        <nav className="flex h-full flex-col items-center justify-center gap-6">
+        <nav className="flex min-h-full flex-col items-center justify-center gap-5 px-6 pt-24 pb-10 sm:gap-6">
           {links.map((link, i) => (
             <a
               key={link.href}
               href={link.href}
               onClick={() => setOpen(false)}
-              className="font-serif text-3xl text-cream transition hover:text-gold"
+              className="font-serif text-2xl text-cream transition hover:text-gold sm:text-3xl"
               style={{ transitionDelay: open ? `${i * 40}ms` : "0ms" }}
             >
               {link.label}
@@ -122,6 +127,6 @@ export default function Header() {
           ))}
         </nav>
       </div>
-    </header>
+    </>
   );
 }

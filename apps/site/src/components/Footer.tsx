@@ -116,9 +116,20 @@ export default async function Footer() {
           ) : null}
         </div>
 
-        <p className="mt-10 text-center text-xs text-muted lg:mt-14">
-          © 2026 {company.company_name || "ELAK"} Salon UAE. All rights reserved.
-        </p>
+        <div className="mt-10 flex flex-col items-center gap-2 border-t border-border/50 pt-6 text-center text-xs text-muted sm:flex-row sm:justify-between lg:mt-14">
+          <p>© 2026 {company.company_name || "ELAK"} Salon UAE. All rights reserved.</p>
+          <p>
+            Developed by{" "}
+            <a
+              href="https://www.instagram.com/by_rafiii/"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-gold transition hover:text-gold-soft"
+            >
+              Ahamad Rafi
+            </a>
+          </p>
+        </div>
       </Container>
     </footer>
   );
