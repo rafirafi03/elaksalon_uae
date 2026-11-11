@@ -49,10 +49,16 @@ export type PasswordFormState = { error?: string; success?: string };
 
 /** Base URL of the admin app for links in emails. */
 async function adminOrigin() {
-  const fromEnv = process.env.NEXT_PUBLIC_SITE_URL?.replace(/\/$/, "");
-  if (fromEnv) return fromEnv;
+  const fromEnv = process.env.NEXT_PUBLIC_SITE_URL?.trim().replace(/\/$/, "");
+  const isLocal = (url: string) => /^https?:\/\/(localhost|127\.0\.0\.1)(:|\/|$)/i.test(url);
+  // Use the configured URL, but never a localhost one in production (a copied dev value).
+  if (fromEnv && !(process.env.NODE_ENV === "production" && isLocal(fromEnv))) return fromEnv;
+
+  // Otherwise use the address this request actually came to (works behind Vercel's proxy).
   const h = await headers();
-  return h.get("origin") ?? `https://${h.get("host")}`;
+  const host = h.get("x-forwarded-host") ?? h.get("host");
+  if (host) return `${h.get("x-forwarded-proto") ?? (host.startsWith("localhost") ? "http" : "https")}://${host}`;
+  return h.get("origin") ?? fromEnv ?? "";
 }
 
 /** Sends a password reset email. Always answers the same way so emails can't be probed. */
