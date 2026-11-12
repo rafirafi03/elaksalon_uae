@@ -27,7 +27,8 @@ export async function sendContactMessage(_prev: ContactState, formData: FormData
 
   const apiKey = process.env.RESEND_API_KEY;
   const company = await getCompanySettings();
-  const to = process.env.CONTACT_TO_EMAIL || company.email;
+  // Always send to the email saved in Admin → Company details (env only as a fallback).
+  const to = company.email?.trim() || process.env.CONTACT_TO_EMAIL;
   const from = process.env.CONTACT_FROM_EMAIL || `${company.company_name} Website <onboarding@resend.dev>`;
 
   if (!apiKey || !to) {
